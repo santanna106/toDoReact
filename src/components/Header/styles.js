@@ -27,11 +27,20 @@ height:70px;
 display:flex;
 align-items:center;
 justify-content:flex-end;
-a {
+
+button {
+        background:none;
+        border:none;
+        cursor:pointer;
+    }
+
+a,button {
     color:#FFF;
     font-weight:bold;
     text-decoration:none;
     margin: 0 10px;
+
+   
 
     &:hover{
         color:#EA6C0C

@@ -1,9 +1,10 @@
 import React from 'react'
+import {Link} from 'react-router-dom';
 import * as S from './styles';
 import logo from '../../assets/logo.png';
 import bell from '../../assets/bell.png';
 
-export default function Header() {
+export default function Header({lateCount,clickNotification}) {
     return (
         <S.Container>
             <S.LeftSide>
@@ -11,17 +12,17 @@ export default function Header() {
                 <img src={logo} alt="Logo" />
             </S.LeftSide>
             <S.RightSide>
-               <a hre="#">INÍCIO</a>
+                <Link to="/">INÍCIO</Link>
                <span className="dividir"/>
-               <a hre="#">NOVA TAREVA</a>
+               <Link to="/task">NOVA TAREVA</Link>
                <span className="dividir"/>
                <a hre="#">SINCRONIZAR CELULAR</a>
                <span className="dividir"/>
-               <a hre="#" id="notification">
+               <button onClick={clickNotification} id="notification">
                    <img src={bell} alt="Notificação" />
-                   <span>5</span>
-
-               </a>
+                   <span>{lateCount}</span>
+               </button>
+            
             </S.RightSide>
         </S.Container>
     )
