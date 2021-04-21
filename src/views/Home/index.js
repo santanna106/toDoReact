@@ -1,4 +1,5 @@
 import React,{useState,useEffect} from 'react';
+import {Link} from 'react-router-dom';
 import * as S from './styles';
 
 import api from '../../services/api';
@@ -15,7 +16,7 @@ function Home() {
 
     const [filterActived,setFilterActived] = useState('all');
     const [tasks, setTasks] = useState([]);
-    const [lateCount, setLateCount] = useState();
+    
 
     async function loadTask(){
         await api.get(`task/filter/${filterActived}/11.11.11.11.110`)
@@ -28,20 +29,10 @@ function Home() {
                  });
     }
 
-    async function lateVarify(){
-        await api.get(`task/filter/late/11.11.11.11.110`)
-                 .then(response => {
-                     
-                     setLateCount(response.data.length)
-                 }).
-                 catch(error => {
-                     console.log(error)
-                 });
-    }
+    
 
     useEffect(() => {
         loadTask();
-        lateVarify();
     },[filterActived])
 
     function notification(){
@@ -51,7 +42,7 @@ function Home() {
     return (
         <S.Container>
            
-            <Header lateCount={lateCount} clickNotification={notification}/>
+            <Header  clickNotification={notification}/>
             <S.FilterArea>
                 <button type="button"  onClick={() => setFilterActived("all")}>
                     <FilterCard title={"Todos"}  actived={filterActived === "all"}/>
@@ -80,7 +71,10 @@ function Home() {
                     tasks.map( t => {
                         console.log('T: ', t);
                         return (
-                            <TaskCard key={t._id} type={t.type} title={t.title} when={t.when} />
+                            <Link to={`/task/${t._id}`}>
+                                <TaskCard key={t._id} type={t.type} title={t.title} when={t.when} done={t.done} />
+                            </Link>
+                            
                         )
                     })
                    

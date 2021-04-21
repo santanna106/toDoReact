@@ -1,5 +1,7 @@
 import React,{useState,useEffect} from 'react';
 import * as S from './styles';
+import {format} from 'date-fns';
+import {Redirect} from 'react-router-dom';
 
 import api from '../../services/api';
 
@@ -11,9 +13,9 @@ import Footer from '../../components/Footer';
 import iconCalender from '../../assets/calender.png';
 import iconClock from '../../assets/clock.png';
 
-function Task() {
-
-    const [lateCount, setLateCount] = useState();
+function Task({match}) {
+    const [redirect,setRedirect] = useState(false);
+ 
     const [type,setType] = useState();
     const [id,setId] = useState();
     const [done,setDone] = useState(false);
@@ -23,36 +25,79 @@ function Task() {
     const [hour,setHour] = useState();
     const [macaddress,setMacAddress] = useState('11.11.11.11.110');
 
-    async function lateVarify(){
-        await api.get(`task/filter/late/11.11.11.11.110`)
-                 .then(response => {
-                     
-                     setLateCount(response.data.length)
-                 }).
-                 catch(error => {
-                     console.log(error)
-                 });
+    
+    async function Remove(){
+        const res = window.confirm('Deseja realmente remover a tarefa? ')
+        if(res === true){
+            alert('ok, vamos remover');
+            await api.delete(`/task/${match.params.id}`)
+             .then(() => setRedirect(true));
+        }
+    }
+
+    async function loadTaskDetails(){
+        await api.get(`/task/${match.params.id}`)
+        .then(response => {
+           setType(response.data.type)
+           setTitle(response.data.title)
+           setDone(response.data.done)
+           setDescription(response.data.description)
+           setDate(format(new Date(response.data.when),'yyyy-MM-dd'))
+           setHour(format(new Date(response.data.when),'HH:mm'))
+
+           console.log('RESPONSE: ',response);
+        })
     }
 
     async function save(){
-        await api.post('/task',{
-            macaddress,
-            title,
-            type,
-            description,
-            when: `${date}T${hour}:00.000`
-        })
-        .then(() => { alert('Tarefa Cadastrada com Sucesso')} )
+
+        //Validacao
+
+        if(!title)
+            return alert('Você precisa informar o título');
+        else if (!description) {alert('Você precisa informar a descrição');}
+        else if (!type) {alert('Você precisa informar o tipo da tarefa');}
+        else if (!date) {alert('Você precisa informar a data');}
+        else if (!hour) {alert('Você precisa informar a hora');}
+
+        if(match.params.id){
+
+            await api.put(`/task/${match.params.id}`,{
+                macaddress,
+                done,
+                title,
+                type,
+                description,
+                when: `${date}T${hour}:00.000`
+            })
+            .then(() => {
+                setRedirect(true)
+             } )
+
+        } else {
+
+            await api.post('/task',{
+                macaddress,
+                title,
+                type,
+                description,
+                when: `${date}T${hour}:00.000`
+            })
+            .then(() =>  setRedirect(true) )
+
+        }
+
+        
     }
 
     useEffect(() => {
-        lateVarify();
+        loadTaskDetails();
     },[])
 
     return (
         <S.Container>
-           
-            <Header lateCount={lateCount} />
+           {redirect && <Redirect to="/" />}
+            <Header />
                 <S.Form>
                     <S.TypeIcons>
                         {
@@ -89,9 +134,9 @@ function Task() {
                             <input type="checkbox" checked={done} onChange={()=> setDone(!done)}/>
                             <span>CONCLUÍDO</span>
                         </div>
-                        <button type="button">
+                        {match.params.id && <button type="button" onClick={Remove}>
                             EXCLUIR
-                        </button>
+                        </button>}
                     </S.Options>
                     <S.Save>
                         <button type="button" onClick={save}>Salvar</button>
